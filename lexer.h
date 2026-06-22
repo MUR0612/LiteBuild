@@ -3,18 +3,18 @@
 
 #include <stdbool.h>
 
-/* 切分字串並回傳 tokens 陣列，numTokens 會被賦值為 token 的數量 */
+/* Splits a string and returns a token array; numTokens receives the count. */
 char** lexer_tokenize_line(const char* line, unsigned int* numTokens);
 
-/* 釋放 tokens 陣列及內部字串 */
+/* Frees the token array and its strings. */
 void lexer_free_tokens(char** tokens, unsigned int numTokens);
 
-/* 單一 Token 驗證 */
+/* Single-token validation. */
 bool lexer_is_valid_identifier(const char* token);
 bool lexer_is_valid_filename(const char* token);
 bool lexer_is_valid_variable_expansion(const char* token);
 
-/* 語法行驗證 */
+/* Syntax-line validation. */
 bool lexer_is_valid_variable_definition(char** tokens, unsigned int numTokens);
 bool lexer_is_valid_dependency_definition(char** tokens, unsigned int numTokens);
 bool lexer_is_valid_phony_target_definition(char** tokens, unsigned int numTokens);

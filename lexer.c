@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* --- Lexer 實作 --- */
+/* --- Lexer implementation --- */
 
 char** lexer_tokenize_line(const char* line, unsigned int* numTokens) {
     if (!line || !numTokens) return NULL;
@@ -41,7 +41,7 @@ void lexer_free_tokens(char** tokens, unsigned int numTokens) {
     free(tokens);
 }
 
-/* --- 驗證邏輯 --- */
+/* --- Validation logic --- */
 
 bool lexer_is_valid_identifier(const char* token) {
     if (!token || !isalpha(token[0])) return false;
@@ -52,7 +52,7 @@ bool lexer_is_valid_identifier(const char* token) {
 }
 
 bool lexer_is_valid_filename(const char* token) {
-    // 這裡刪掉 strlen(token) == 0，改成 token[0] == '\0' 以優化效能
+    // Check token[0] directly instead of calling strlen for an empty string.
     if (!token || token[0] == '\0') return false; 
     const char* invalid_chars = ":=>/#\\$~";
     for (int i = 0; token[i] != '\0'; i++) {
@@ -66,7 +66,7 @@ bool lexer_is_valid_variable_expansion(const char* token) {
     return lexer_is_valid_identifier(token + 1);
 }
 
-/* --- 語句驗證 --- */
+/* --- Statement validation --- */
 
 bool lexer_is_valid_variable_definition(char** tokens, unsigned int numTokens) {
     if (numTokens < 2) return false;

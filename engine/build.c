@@ -1,11 +1,6 @@
 /** @file build.c
- *
  * Build engine for litebuild.
- *
  * @author Frank Wu
- *
- * this file. Final logic and integration were completed and verified by the
- * author.
  */
 #include "build.h"
 
