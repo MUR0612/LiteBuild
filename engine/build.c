@@ -20,12 +20,12 @@
 #include <sys/stat.h>
 #define MIN_OBJECT_TARGET_LENGTH 3
 
-static BuildResult build_target_recursive(UQMakefileModel* model,
+static BuildResult build_target_recursive(BuildFileModel* model,
         VariableTable* vars, const char* targetName, bool isTopLevel,
         const CommandLineOptions* options, RuntimeState* runtime);
 static bool is_object_file_target(const char* name);
 static char* make_matching_c_filename(const char* objName);
-static BuildResult handle_implicit_object_rule(UQMakefileModel* model,
+static BuildResult handle_implicit_object_rule(BuildFileModel* model,
         VariableTable* vars, const char* targetName, bool isTopLevel,
         const CommandLineOptions* options, RuntimeState* runtime);
 static bool should_rebuild_file_target(const char* targetName,
@@ -33,7 +33,7 @@ static bool should_rebuild_file_target(const char* targetName,
         struct timespec targetMtime);
 static StringVector make_compile_command(
         const VariableTable* vars, const char* sourceName);
-static StringVector make_link_command(UQMakefileModel* model,
+static StringVector make_link_command(BuildFileModel* model,
         const VariableTable* vars, const char* targetName,
         char** dependencies, int dependencyCount);
 static void expand_file_target_dependencies_if_needed(
@@ -176,16 +176,16 @@ static BuildResult report_missing_file(const char* targetName)
 /**
  * Checks if target is phony.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param name target name.
  * @return true if phony.
  *
  */
-static bool is_phony_target_name(const UQMakefileModel* model, const char* name)
+static bool is_phony_target_name(const BuildFileModel* model, const char* name)
 {
     Target* target;
 
-    target = find_target_by_name((UQMakefileModel*)model, name);
+    target = find_target_by_name((BuildFileModel*)model, name);
     return target != NULL && target->type == TARGET_PHONY;
 }
 
@@ -294,7 +294,7 @@ static BuildResult handle_existing_file_target(
 /**
  * Builds all dependencies for one file target.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param fileTarget file target being built.
  * @param options CLI options.
@@ -303,7 +303,7 @@ static BuildResult handle_existing_file_target(
  *
  * build_explicit_file_target.
  */
-static BuildResult* build_file_dependencies(UQMakefileModel* model,
+static BuildResult* build_file_dependencies(BuildFileModel* model,
         VariableTable* vars, FileTarget* fileTarget,
         const CommandLineOptions* options, RuntimeState* runtime)
 {
@@ -334,7 +334,7 @@ static bool build_results_succeeded(const BuildResult* results, int count)
 /**
  * Runs the compile or link command for an explicit file target.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param targetName target name.
  * @param fileTarget file target data.
@@ -343,7 +343,7 @@ static bool build_results_succeeded(const BuildResult* results, int count)
  *
  * build_explicit_file_target.
  */
-static bool run_explicit_file_command(UQMakefileModel* model,
+static bool run_explicit_file_command(BuildFileModel* model,
         VariableTable* vars, const char* targetName, FileTarget* fileTarget,
         const CommandLineOptions* options, RuntimeState* runtime)
 {
@@ -437,7 +437,7 @@ static BuildResult make_no_action_file_result(const char* targetName,
 /**
  * Builds an explicit file target after its dependencies have been handled.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param targetName target name.
  * @param fileTarget file target data.
@@ -448,7 +448,7 @@ static BuildResult make_no_action_file_result(const char* targetName,
  *
  * helper functions.
  */
-static BuildResult build_explicit_file_target(UQMakefileModel* model,
+static BuildResult build_explicit_file_target(BuildFileModel* model,
         VariableTable* vars, const char* targetName, FileTarget* fileTarget,
         bool isTopLevel, const CommandLineOptions* options,
         RuntimeState* runtime)
@@ -520,7 +520,7 @@ static BuildResult build_explicit_file_target(UQMakefileModel* model,
  * @return build result.
  *
  */
-static BuildResult build_target_recursive(UQMakefileModel* model, VariableTable* vars,
+static BuildResult build_target_recursive(BuildFileModel* model, VariableTable* vars,
         const char* targetName, bool isTopLevel,
         const CommandLineOptions* options, RuntimeState* runtime)
 {
@@ -528,7 +528,7 @@ static BuildResult build_target_recursive(UQMakefileModel* model, VariableTable*
 
     stop_if_interrupted(runtime);
 
-    // Look up the target in the parsed uqmakefile model.
+    // Look up the target in the parsed BuildFile model.
     target = find_target_by_name(model, targetName);
 
     // If it is a phony target, build it using its pipeline.
@@ -557,13 +557,13 @@ static BuildResult build_target_recursive(UQMakefileModel* model, VariableTable*
 /**
  * Builds requested targets.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param options CLI options.
  * @param runtime runtime state.
  *
  */
-bool build_requested_targets(UQMakefileModel* model,
+bool build_requested_targets(BuildFileModel* model,
         VariableTable* vars, const CommandLineOptions* options,
         RuntimeState* runtime)
 {
@@ -689,7 +689,7 @@ static bool run_implicit_object_command(VariableTable* vars,
 /**
  * Handles implicit object build rule.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param targetName target name.
  * @param isTopLevel top-level flag.
@@ -699,7 +699,7 @@ static bool run_implicit_object_command(VariableTable* vars,
  *
  * helper functions.
  */
-static BuildResult handle_implicit_object_rule(UQMakefileModel* model,
+static BuildResult handle_implicit_object_rule(BuildFileModel* model,
         VariableTable* vars, const char* targetName, bool isTopLevel,
         const CommandLineOptions* options, RuntimeState* runtime)
 {
@@ -820,7 +820,7 @@ static StringVector make_compile_command(
 /**
  * Creates link command.
  *
- * @param model uqmakefile model.
+ * @param model BuildFile model.
  * @param vars variable table.
  * @param targetName output name.
  * @param dependencies deps.
@@ -829,7 +829,7 @@ static StringVector make_compile_command(
  * @return argv.
  *
  */
-static StringVector make_link_command(UQMakefileModel* model, const VariableTable* vars,
+static StringVector make_link_command(BuildFileModel* model, const VariableTable* vars,
         const char* targetName, char** dependencies, int dependencyCount)
 {
     StringVector cmd;

@@ -7,10 +7,10 @@
 #include "../core/types.h"
 
 bool parse_makefile(FILE* fp, const char* filename,
-        UQMakefileModel* outModel);
-bool check_requested_targets_exist(const UQMakefileModel* model,
+        BuildFileModel* outModel);
+bool check_requested_targets_exist(const BuildFileModel* model,
         const CommandLineOptions* options, const char* filename);
-Target* find_target_by_name(UQMakefileModel* model, const char* name);
-void free_uqmakefile_model(UQMakefileModel* model);
+Target* find_target_by_name(BuildFileModel* model, const char* name);
+void free_build_file_model(BuildFileModel* model);
 
 #endif /* FRONTEND_PARSER_H */

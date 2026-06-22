@@ -6,7 +6,7 @@
 #include "../core/types.h"
 #include "../core/variable.h"
 
-bool build_requested_targets(UQMakefileModel* model, VariableTable* vars,
+bool build_requested_targets(BuildFileModel* model, VariableTable* vars,
         const CommandLineOptions* options, RuntimeState* runtime);
 
 #endif /* ENGINE_BUILD_H */

@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 {
     CommandLineOptions options = parse_command_line(argc, argv);
     FILE* fp = fopen(options.makefileName, "r");
-    UQMakefileModel model;
+    BuildFileModel model;
 
     if (fp == NULL) {
         log_error("unable to open makefile \"%s\" for reading\n",
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    // Parse the uqmakefile before checking requested targets.
+    // Parse the BuildFile before checking requested targets.
     if (!parse_makefile(fp, options.makefileName, &model)) {
         fclose(fp);
         free_command_line_options(&options);
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
     if (!check_requested_targets_exist(&model, &options,
                 options.makefileName)) {
-        free_uqmakefile_model(&model);
+        free_build_file_model(&model);
         free_command_line_options(&options);
         return EXIT_FAILURE;
     }
@@ -67,14 +67,14 @@ int main(int argc, char* argv[])
     if (!build_requested_targets(&model, &vars, &options, &runtime)) {
         free_runtime_state(&runtime);
         free_variable_table(&vars);
-        free_uqmakefile_model(&model);
+        free_build_file_model(&model);
         free_command_line_options(&options);
         return EXIT_FAILURE;
     }
 
     free_runtime_state(&runtime);
     free_variable_table(&vars);
-    free_uqmakefile_model(&model);
+    free_build_file_model(&model);
     free_command_line_options(&options);
     return EXIT_SUCCESS;
 }

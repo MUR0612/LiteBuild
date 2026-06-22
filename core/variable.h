@@ -4,7 +4,7 @@
 #include "types.h"
 
 VariableTable build_variable_table(
-        const UQMakefileModel* model, const CommandLineOptions* options);
+        const BuildFileModel* model, const CommandLineOptions* options);
 void set_variable(VariableTable* table, const char* name, StringVector values);
 Variable* lookup_variable(VariableTable* table, const char* name);
 StringVector expand_tokens_once(const VariableTable* table,

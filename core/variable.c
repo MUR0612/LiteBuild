@@ -28,7 +28,7 @@ static StringVector make_vector_from_values(const char* const* values,
 }
 
 VariableTable build_variable_table(
-        const UQMakefileModel* model, const CommandLineOptions* options)
+        const BuildFileModel* model, const CommandLineOptions* options)
 {
     VariableTable table;
     const char* compiler[] = {"gcc"};

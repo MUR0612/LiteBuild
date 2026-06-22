@@ -75,7 +75,7 @@ typedef struct {
     int targetCount;
     char* firstTargetName;
     HashMap* targetMap;
-} UQMakefileModel;
+} BuildFileModel;
 
 typedef struct {
     HashMap* map;

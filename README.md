@@ -17,7 +17,7 @@ A custom, lightweight, and POSIX-compliant build automation tool written entirel
 The project is heavily modularized for maintainability and scalability:
 * `frontend/`: Command-line interface parsing and lexical/syntactical analysis.
 * `engine/`: The core build engine, dependency graph traversal, and process execution lifecycle.
-* `core/`: Core definitions of Targets, Variables, and the UQMakefile internal model.
+* `core/`: Core definitions of Targets, Variables, and the BuildFile internal model.
 * `utils/`: Memory-safe dynamic data structures (`Vector`, `HashMap`) and standardized logging.
 
 ## Usage

@@ -13,11 +13,11 @@
 #include "../utils/logger.h"
 #include "../utils/memory.h"
 
-static bool handle_variable_line(UQMakefileModel* model, char** tokens,
+static bool handle_variable_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber);
-static bool handle_dependency_line(UQMakefileModel* model, char** tokens,
+static bool handle_dependency_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber);
-static bool handle_phony_line(UQMakefileModel* model, char** tokens,
+static bool handle_phony_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber);
 static bool target_name_already_seen(const HashMap* seenTargetNames,
         const char* name);
@@ -52,7 +52,7 @@ static void print_line_not_valid_error(const char* filename, int lineNumber)
             lineNumber);
 }
 
-static bool append_variable_def(UQMakefileModel* model, VariableDef def)
+static bool append_variable_def(BuildFileModel* model, VariableDef def)
 {
     VariableDef* resized = xrealloc(model->variableDefs,
             sizeof(VariableDef) * (model->variableDefCount + 1));
@@ -63,7 +63,7 @@ static bool append_variable_def(UQMakefileModel* model, VariableDef def)
     return true;
 }
 
-static bool append_target(UQMakefileModel* model, Target target)
+static bool append_target(BuildFileModel* model, Target target)
 {
     char* firstTargetName = NULL;
     Target* resized;
@@ -86,7 +86,7 @@ static bool append_target(UQMakefileModel* model, Target target)
     return true;
 }
 
-static bool parse_variable_tokens(UQMakefileModel* model, char** tokens,
+static bool parse_variable_tokens(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, const char* filename, int lineNumber)
 {
     if (!lexer_is_valid_variable_definition(tokens, tokenCount)) {
@@ -97,7 +97,7 @@ static bool parse_variable_tokens(UQMakefileModel* model, char** tokens,
     return !handle_variable_line(model, tokens, tokenCount, lineNumber);
 }
 
-static bool parse_dependency_tokens(UQMakefileModel* model, char** tokens,
+static bool parse_dependency_tokens(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, const char* filename, int lineNumber,
         HashMap* seenTargetNames)
 {
@@ -118,7 +118,7 @@ static bool parse_dependency_tokens(UQMakefileModel* model, char** tokens,
     return false;
 }
 
-static bool parse_phony_tokens(UQMakefileModel* model, char** tokens,
+static bool parse_phony_tokens(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, const char* filename, int lineNumber,
         HashMap* seenTargetNames)
 {
@@ -139,7 +139,7 @@ static bool parse_phony_tokens(UQMakefileModel* model, char** tokens,
     return false;
 }
 
-static bool parse_line_tokens(UQMakefileModel* model, char** tokens,
+static bool parse_line_tokens(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, const char* filename, int lineNumber,
         HashMap* seenTargetNames)
 {
@@ -165,7 +165,7 @@ static bool parse_line_tokens(UQMakefileModel* model, char** tokens,
 }
 
 bool parse_makefile(FILE* fp, const char* filename,
-        UQMakefileModel* outModel)
+        BuildFileModel* outModel)
 {
     char* line = NULL;
     size_t lineCapacity = 0;
@@ -173,7 +173,7 @@ bool parse_makefile(FILE* fp, const char* filename,
     bool foundError = false;
     HashMap* seenTargetNames;
 
-    memset(outModel, 0, sizeof(UQMakefileModel));
+    memset(outModel, 0, sizeof(BuildFileModel));
     seenTargetNames = hashmap_create(64);
 
     while (getline(&line, &lineCapacity, fp) != -1) {
@@ -193,13 +193,13 @@ bool parse_makefile(FILE* fp, const char* filename,
     hashmap_free(seenTargetNames, NULL);
 
     if (foundError) {
-        free_uqmakefile_model(outModel);
+        free_build_file_model(outModel);
         return false;
     }
 
     if (outModel->targetCount == 0) {
         log_error("no targets were found in file \"%s\"\n", filename);
-        free_uqmakefile_model(outModel);
+        free_build_file_model(outModel);
         return false;
     }
 
@@ -212,7 +212,7 @@ bool parse_makefile(FILE* fp, const char* filename,
     return true;
 }
 
-static bool handle_variable_line(UQMakefileModel* model, char** tokens,
+static bool handle_variable_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber)
 {
     VariableDef def = {0};
@@ -233,7 +233,7 @@ static bool handle_variable_line(UQMakefileModel* model, char** tokens,
     return true;
 }
 
-static bool handle_dependency_line(UQMakefileModel* model, char** tokens,
+static bool handle_dependency_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber)
 {
     Target target = {0};
@@ -258,7 +258,7 @@ static bool handle_dependency_line(UQMakefileModel* model, char** tokens,
     return true;
 }
 
-static bool handle_phony_line(UQMakefileModel* model, char** tokens,
+static bool handle_phony_line(BuildFileModel* model, char** tokens,
         unsigned int tokenCount, int lineNumber)
 {
     Target target = {0};
@@ -289,12 +289,12 @@ static bool target_name_already_seen(const HashMap* seenTargetNames,
     return hashmap_get(seenTargetNames, name) != NULL;
 }
 
-Target* find_target_by_name(UQMakefileModel* model, const char* name)
+Target* find_target_by_name(BuildFileModel* model, const char* name)
 {
     return (Target*)hashmap_get(model->targetMap, name);
 }
 
-bool check_requested_targets_exist(const UQMakefileModel* model,
+bool check_requested_targets_exist(const BuildFileModel* model,
         const CommandLineOptions* options, const char* filename)
 {
     bool foundMissing = false;
@@ -302,7 +302,7 @@ bool check_requested_targets_exist(const UQMakefileModel* model,
     for (int i = 0; i < options->requestedTargets.count; i++) {
         const char* targetName = options->requestedTargets.data[i];
 
-        if (find_target_by_name((UQMakefileModel*)model, targetName) == NULL) {
+        if (find_target_by_name((BuildFileModel*)model, targetName) == NULL) {
             log_error("unable to find target \"%s\" in file \"%s\"\n",
                     targetName, filename);
             foundMissing = true;
@@ -312,7 +312,7 @@ bool check_requested_targets_exist(const UQMakefileModel* model,
     return !foundMissing;
 }
 
-static void free_variable_defs(UQMakefileModel* model)
+static void free_variable_defs(BuildFileModel* model)
 {
     for (int i = 0; i < model->variableDefCount; i++) {
         VariableDef* def = &model->variableDefs[i];
@@ -336,7 +336,7 @@ static void free_phony_target(PhonyTarget* phonyTarget)
     strvec_free(&phonyTarget->expandedPipeline);
 }
 
-static void free_targets(UQMakefileModel* model)
+static void free_targets(BuildFileModel* model)
 {
     for (int i = 0; i < model->targetCount; i++) {
         Target* target = &model->targets[i];
@@ -353,7 +353,7 @@ static void free_targets(UQMakefileModel* model)
     free(model->targets);
 }
 
-static void reset_model(UQMakefileModel* model)
+static void reset_model(BuildFileModel* model)
 {
     model->variableDefs = NULL;
     model->variableDefCount = 0;
@@ -363,7 +363,7 @@ static void reset_model(UQMakefileModel* model)
     model->targetMap = NULL;
 }
 
-void free_uqmakefile_model(UQMakefileModel* model)
+void free_build_file_model(BuildFileModel* model)
 {
     if (model == NULL) {
         return;
